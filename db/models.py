@@ -1,8 +1,8 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 
 class Genre(models.Model):
@@ -61,15 +61,15 @@ class User(AbstractUser):
 
 
 class Order(models.Model):
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
-        to=User,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="orders"
     )
 
     def __str__(self) -> str:
-        return f"<Order: {self.created_at}>"
+        return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
 
     class Meta:
         ordering = ["-created_at"]
@@ -114,8 +114,8 @@ class Ticket(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return (f"<Ticket: {self.movie_session}"
-                f" (row: {self.row}, seat: {self.seat})>")
+        return (f"{self.movie_session}"
+                f" (row: {self.row}, seat: {self.seat})")
 
     class Meta:
         constraints = [UniqueConstraint(fields=[
